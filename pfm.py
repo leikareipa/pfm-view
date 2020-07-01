@@ -51,7 +51,7 @@ class PFMImage:
 
     def color_at(self, x, y):
         """Returns the RGB color of the PFM image at pixel coordinates XY."""
-        
+
         return {
             "red":   self.red_at(x, y),
             "green": self.green_at(x, y),
@@ -59,7 +59,16 @@ class PFMImage:
         }
 
     def color_channel_value_at(self, x, y, channelIdx = 0):
-        """Returns the value of color channel n of the pixel at XY in the PFM image."""
+        """Returns the value of color channel n of the pixel at XY in the PFM
+        image. Note that Y=0 is assumed to be the top left corner."""
+
+        assert (x < self.height), "Pixel coordinate out of bounds."
+        assert (y < self.width), "Pixel coordinate out of bounds."
+
+        # PFM images store pixel data from bottom to top (Y=0 is the bottom left
+        # corner), whereas we expect the user wants pixels in top-to-bottom order
+        # (Y=0 being the top left corner), so let's flip the coordinates on Y.
+        y = (self.height - y - 1)
 
         endianness = ("<f" if self.isLittleEndian else ">f")
         idx = (((x + y * self.width) * self.NUM_COLOR_CHANNELS * self.NUM_BYTES_PER_CHANNEL) + (channelIdx * self.NUM_BYTES_PER_CHANNEL))
