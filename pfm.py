@@ -3,17 +3,13 @@
 from pathlib import Path
 import struct
 
-class Color:
-    """RGBA color in the range [0,1] (bounds not enforced)."""
-
-    def __init__(self, red = 1 , green = 0, blue = 1, alpha = 1):
-        self.red = red
-        self.green = green
-        self.blue = blue
-        self.alpha = alpha
-
 class PFMImage:
     """Holds data loaded from a PFM image file."""
+
+    # PFM files' pixel data is RGB with each channel being represented by 4
+    # bytes (to be interpreted as a 32-bit float).
+    NUM_COLOR_CHANNELS = 3
+    NUM_BYTES_PER_CHANNEL = 4
 
     def __init__(self, sourceFileName = None):
         self.width = None
@@ -21,8 +17,8 @@ class PFMImage:
         self.isLittleEndian = None
         self.type = None
         self.userValue = None
-        self.pixels = None # Will be a list with a Color element for each pixel.
         self.filename = None
+        self.rawPixelData = None # The PFM's pixel data as a raw byte array.
 
         if sourceFileName:
             self.load_from_file(sourceFileName)
@@ -46,30 +42,42 @@ class PFMImage:
         [self.width, self.height] = map(lambda binaryValue: int(binaryValue.decode("ascii")), pfmConstituents[1].split(b" "))
         self.isLittleEndian = (pfmConstituents[2][0] == 45) # 45 representing the ASCII character '-'.
         self.userValue = abs(float(pfmConstituents[2]))
+        self.rawPixelData = b"\x0a".join(pfmConstituents[3:])
 
-        # Convert the binary pixel data into RGB pixel values. Each pixel consists of
-        # red, green, and blue channels (no alpha), and each channel is composed of
-        # 4 bytes to be interpreted as a 32-bit float.
-        pfmPixelBytes = b"\x0a".join(pfmConstituents[3:])
-        endianness = ("<f" if self.isLittleEndian else ">f")
-        numColorChannels = 3
-        bytesPerChannel = 4
+        numPixels = (len(self.rawPixelData) / (self.NUM_COLOR_CHANNELS * self.NUM_BYTES_PER_CHANNEL))
 
-        self.pixels = [Color() for x in range(self.width * self.height)]
-
-        for pixelIdx in range(self.width * self.height):
-
-            idxRed   = (pixelIdx * numColorChannels * bytesPerChannel)
-            idxGreen = (idxRed + bytesPerChannel)
-            idxBlue  = (idxGreen + bytesPerChannel)
-
-            self.pixels[pixelIdx].red   = struct.unpack(endianness, pfmPixelBytes[idxRed:  (idxRed   + bytesPerChannel)])[0]
-            self.pixels[pixelIdx].green = struct.unpack(endianness, pfmPixelBytes[idxGreen:(idxGreen + bytesPerChannel)])[0]
-            self.pixels[pixelIdx].blue  = struct.unpack(endianness, pfmPixelBytes[idxBlue: (idxBlue  + bytesPerChannel)])[0]
-
-        assert (len(self.pixels) == (self.width * self.height)),\
+        assert (numPixels == (self.width * self.height)),\
                "Failed to decode PFM pixel data."
+
+    def color_at(self, x, y):
+        """Returns the RGB color of the PFM image at pixel coordinates XY."""
+        
+        return {
+            "red":   self.red_at(x, y),
+            "green": self.green_at(x, y),
+            "blue":  self.blue_at(x, y),
+        }
+
+    def color_channel_value_at(self, x, y, channelIdx = 0):
+        """Returns the value of color channel n of the pixel at XY in the PFM image."""
+
+        endianness = ("<f" if self.isLittleEndian else ">f")
+        idx = (((x + y * self.width) * self.NUM_COLOR_CHANNELS * self.NUM_BYTES_PER_CHANNEL) + (channelIdx * self.NUM_BYTES_PER_CHANNEL))
+        channelValue = struct.unpack(endianness, self.rawPixelData[idx:(idx + self.NUM_BYTES_PER_CHANNEL)])[0]
+
+        return channelValue
+
+    def red_at(self, x, y):
+        return self.color_channel_value_at(x, y, 0)
+
+    def green_at(self, x, y):
+        return self.color_channel_value_at(x, y, 1)
+
+    def blue_at(self, x, y):
+        return self.color_channel_value_at(x, y, 2)
+
 
 pfm = PFMImage(sourceFileName = "./test.pfm")
 
-print(pfm.filename, pfm.width, pfm.height, pfm.isLittleEndian, pfm.userValue, len(pfm.pixels))
+print(pfm.filename, pfm.width, pfm.height, pfm.isLittleEndian, pfm.userValue, len(pfm.rawPixelData))
+print(pfm.color_at(0, 0))
