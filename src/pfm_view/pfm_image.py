@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from pathlib import Path
 import struct
 
@@ -84,9 +82,3 @@ class PFMImage:
 
     def blue_at(self, x, y):
         return self.color_channel_value_at(x, y, 2)
-
-
-pfm = PFMImage(sourceFileName = "./test.pfm")
-
-print(pfm.filename, pfm.width, pfm.height, pfm.isLittleEndian, pfm.userValue, len(pfm.rawPixelData))
-print(pfm.color_at(0, 0))
