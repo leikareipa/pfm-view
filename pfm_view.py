@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from src.pfm_view.pfm_image import PFMImage
+# 2020 Tarpeeksi Hyvae Soft
+# Software: pfm-view
 
-pfm = PFMImage(sourceFileName = "./test.pfm")
+import sys
+import src.pfm_view.gui as gui
 
-print(pfm.filename, pfm.width, pfm.height, pfm.isLittleEndian, pfm.userValue, len(pfm.rawPixelData))
-print(pfm.color_at(0, 0))
+gui.run(sys.argv)

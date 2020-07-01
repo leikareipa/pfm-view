@@ -1,3 +1,6 @@
+# 2020 Tarpeeksi Hyvae Soft
+# Software: pfm-view
+
 from pathlib import Path
 import struct
 
