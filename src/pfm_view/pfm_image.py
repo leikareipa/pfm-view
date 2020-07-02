@@ -24,7 +24,7 @@ class PFMImage:
         if sourceFileName:
             self.load_from_file(sourceFileName)
 
-    def load_from_file(self, pfmFileName):
+    def load_from_file(self, pfmFileName:str):
         """Populates this instance with data from the given PFM file.
         
         A PFM file consists of a header of 3 ASCII lines, followed by a data block
@@ -50,7 +50,7 @@ class PFMImage:
         assert (numPixels == (self.width * self.height)),\
                "Failed to decode PFM pixel data."
 
-    def color_at(self, x, y):
+    def color_at(self, x:int, y:int):
         """Returns the RGB color of the PFM image at pixel coordinates XY."""
 
         return {
@@ -59,12 +59,15 @@ class PFMImage:
             "blue":  self.blue_at(x, y),
         }
 
-    def color_channel_value_at(self, x, y, channelIdx = 0):
+    def color_channel_value_at(self, x:int, y:int, channelIdx:int = 0):
         """Returns the value of color channel n of the pixel at XY in the PFM
         image. Note that Y=0 is assumed to be the top left corner."""
 
-        assert (x < self.height), "Pixel coordinate out of bounds."
-        assert (y < self.width), "Pixel coordinate out of bounds."
+        assert (x >= 0 and\
+                y >= 0 and\
+                x < self.width and\
+                y < self.height),\
+               "Pixel coordinate out of bounds."
 
         # PFM images store pixel data from bottom to top (Y=0 is the bottom left
         # corner), whereas we expect the user wants pixels in top-to-bottom order
@@ -77,11 +80,11 @@ class PFMImage:
 
         return channelValue
 
-    def red_at(self, x, y):
+    def red_at(self, x:int, y:int):
         return self.color_channel_value_at(x, y, 0)
 
-    def green_at(self, x, y):
+    def green_at(self, x:int, y:int):
         return self.color_channel_value_at(x, y, 1)
 
-    def blue_at(self, x, y):
+    def blue_at(self, x:int, y:int):
         return self.color_channel_value_at(x, y, 2)
