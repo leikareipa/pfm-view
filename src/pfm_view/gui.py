@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QScroller
 from PyQt5.QtGui import QImage, QColor, QPixmap
 from .pfm_image import PFMImage
+from .tonemap_drago03 import tonemap_drago03
 
 app = None
 mainWindow = None
@@ -29,18 +30,15 @@ def run(cliArguments):
     mainWindow.show()
     sys.exit(app.exec())
 
-def __qimage_from_pfm_image(pfmImage:PFMImage, tonemapping:str = "flat"):
+def __qimage_from_pfm_image(pfmImage:PFMImage, tonemapping:str = "linear"):
     """Converts the given PFM image into a QImage, and returns the result. The
     conversion includes tonemapping the converted image's pixels."""
 
     qimage = QImage(pfmImage.width, pfmImage.height, QImage.Format_RGB32)
 
-    assert (tonemapping == "flat"),\
-           "Only flat tonemapping is supported at this time."
-
-    # Flat tonemapping finds the largest pixel value in the image, then scales
+    # Linear tonemapping finds the largest pixel value in the image, then scales
     # all pixels by that value such that the brightest value becomes 1.
-    if tonemapping == "flat":
+    if tonemapping == "linear":
         maxValue = 0
         for y in range(pfmImage.height):
             for x in range(pfmImage.width):
@@ -52,9 +50,31 @@ def __qimage_from_pfm_image(pfmImage:PFMImage, tonemapping:str = "flat"):
         for y in range(pfmImage.height):
             for x in range(pfmImage.width):
                 color = pfmImage.color_at(x, y)
-                qimage.setPixelColor(x, y, QColor(max(0, min(255, ((color["red"] / maxValue)  * 255))),
-                                                  max(0, min(255, ((color["green"] / maxValue) * 255))),
-                                                  max(0, min(255, ((color["blue"] / maxValue)  * 255)))))
+                qimage.setPixelColor(x, y, QColor(max(0, min(255, (color["red"]   / maxValue) * 255)),
+                                                  max(0, min(255, (color["green"] / maxValue) * 255)),
+                                                  max(0, min(255, (color["blue"]  / maxValue) * 255))))
+    elif tonemapping == "drago03":
+        tonemappedPixels = []
+
+        for y in range(pfmImage.height):
+            for x in range(pfmImage.width):
+                pixelColor = pfmImage.color_at(x, y)
+                tonemappedPixels.append({
+                    "red": pixelColor["red"],
+                    "green": pixelColor["green"],
+                    "blue": pixelColor["blue"]
+                })
+
+        tonemap_drago03(pfmImage.width, pfmImage.height, tonemappedPixels)
+
+        for y in range(pfmImage.height):
+            for x in range(pfmImage.width):
+                color = tonemappedPixels[x + y * pfmImage.width]
+                qimage.setPixelColor(x, y, QColor(max(0, min(255, (color["red"]   * 255))),
+                                                  max(0, min(255, (color["green"] * 255))),
+                                                  max(0, min(255, (color["blue"]  * 255)))))
+    else:
+        raise AssertionError("Unrecognized tonemapping mode.")
 
     return qimage
 
