@@ -126,7 +126,7 @@ def __logmapping(width, height, pixels, Lum_max, Lum_min, world_lum,
 
             pixels[index]["red"] = ((math.log(pixels[index]["red"] + 1) / interpol) / divider)
 
-def tonemap_drago03(width, height, pixels, bias = 0.85, exposure = 0):
+def tonemap_drago03(width, height, pixels, bias = 0.8, exposure = 1):
     """Applies tonemapping as described in Drago, Myszkowski, Annen & Chiba 2003:
     Adaptive logarithmic mapping for displaying high contrast scenes.
 

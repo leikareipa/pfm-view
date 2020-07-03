@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>480</height>
+    <width>960</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,8 +43,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>640</width>
-         <height>455</height>
+         <width>960</width>
+         <height>515</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -68,6 +68,9 @@
           <property name="text">
            <string/>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -81,7 +84,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>640</width>
+     <width>960</width>
      <height>25</height>
     </rect>
    </property>
@@ -93,7 +96,17 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuTonemap">
+    <property name="title">
+     <string>Tonemap</string>
+    </property>
+    <addaction name="actionTonemapNone"/>
+    <addaction name="separator"/>
+    <addaction name="actionTonemapLinear"/>
+    <addaction name="actionTonemapDrago03"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTonemap"/>
   </widget>
   <action name="actionLoad_PFM">
    <property name="text">
@@ -103,6 +116,36 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionTonemapLinear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Linear</string>
+   </property>
+  </action>
+  <action name="actionTonemapDrago03">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Drago '03</string>
+   </property>
+  </action>
+  <action name="actionTonemapNone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>None</string>
    </property>
   </action>
  </widget>
